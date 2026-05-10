@@ -1,0 +1,89 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Represents a user in the platform with their assigned role.",
+      "type": "object",
+      "properties": {
+        "role": {
+          "type": "string",
+          "enum": ["individual", "corporate", "farmer"],
+          "description": "The user's functional role in the ecosystem."
+        },
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "displayName": {
+          "type": "string"
+        }
+      },
+      "required": ["role", "email"]
+    },
+    "Project": {
+      "title": "Biogas Project",
+      "description": "A crowdfunding project for biogas energy generation.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "location": { "type": "string" },
+        "heads": { "type": "number" },
+        "targetAmount": { "type": "number" },
+        "currentAmount": { "type": "number" },
+        "roi": { "type": "string" },
+        "carbonReduction": { "type": "string" },
+        "status": { "type": "string", "enum": ["funding", "completed"] },
+        "image": { "type": "string" },
+        "ownerId": { "type": "string", "description": "The farmer or entity owning the site." },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "targetAmount", "currentAmount", "status", "ownerId"]
+    },
+    "Investment": {
+      "title": "Project Investment",
+      "description": "A record of an investment made by a user into a project.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "projectId": { "type": "string" },
+        "amount": { "type": "number" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "roleAtInvestment": { "type": "string" }
+      },
+      "required": ["userId", "projectId", "amount"]
+    },
+    "IoTLog": {
+      "title": "Power Generation Log",
+      "description": "Time-series data for power generation from a specific project.",
+      "type": "object",
+      "properties": {
+        "projectId": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "power": { "type": "number" }
+      },
+      "required": ["projectId", "timestamp", "power"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile and role information."
+    },
+    "/projects/{projectId}": {
+      "schema": "Project",
+      "description": "Details of biogas crowdfunding projects."
+    },
+    "/projects/{projectId}/investments/{investmentId}": {
+      "schema": "Investment",
+      "description": "Investments linked to a specific project."
+    },
+    "/projects/{projectId}/iot_logs/{logId}": {
+      "schema": "IoTLog",
+      "description": "Power generation logs for monitoring."
+    },
+    "/investments/{investmentId}": {
+      "schema": "Investment",
+      "description": "Global view of investments for query convenience."
+    }
+  }
+}

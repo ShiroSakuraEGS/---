@@ -1,0 +1,97 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Primitives & Helpers ---
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(uid) { return isSignedIn() && request.auth.uid == uid; }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    
+    function isValidUser(data) {
+      return data.email is string && data.email.size() <= 256
+        && data.role in ['individual', 'corporate', 'farmer']
+        && data.keys().hasAll(['role', 'email'])
+        && data.keys().size() >= 2;
+    }
+
+    function isValidProject(data) {
+      return data.title is string && data.title.size() <= 200
+        && data.location is string && data.location.size() <= 200
+        && data.heads is number && data.heads >= 0
+        && data.targetAmount is number && data.targetAmount > 0
+        && data.currentAmount is number && data.currentAmount >= 0
+        && data.status in ['funding', 'completed']
+        && data.ownerId is string && data.ownerId.size() <= 128
+        && data.keys().hasAll(['title', 'targetAmount', 'currentAmount', 'status', 'ownerId'])
+        && data.keys().size() >= 5;
+    }
+
+    function isValidInvestment(data) {
+      return data.userId == request.auth.uid
+        && data.projectId is string && data.projectId.size() <= 128
+        && data.amount is number && data.amount > 0
+        && data.keys().hasAll(['userId', 'projectId', 'amount'])
+        && data.keys().size() >= 3
+        && exists(/databases/$(database)/documents/projects/$(data.projectId));
+    }
+
+    // --- Collections ---
+
+    // 1. Users Collection
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false; // No blanket scraping
+      
+      allow create: if isOwner(userId) && isValidUser(incoming());
+      
+      allow update: if isOwner(userId) && isValidUser(incoming()) && (
+        // Only allow changing displayName or updating updatedAt
+        incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'updatedAt'])
+        // Role is immutable once set to prevent identity jumping
+        && incoming().role == existing().role
+      );
+    }
+
+    // 2. Projects Collection
+    match /projects/{projectId} {
+      allow get, list: if true; // Public transparency for green energy
+      
+      allow create: if isSignedIn() && isValidProject(incoming()) && incoming().ownerId == request.auth.uid;
+      
+      allow update: if isSignedIn() && isValidProject(incoming()) && (
+        // Action: Invest (Any signed in user can contribute)
+        (incoming().diff(existing()).affectedKeys().hasOnly(['currentAmount', 'status']) && incoming().currentAmount > existing().currentAmount) ||
+        // Action: Manage (Owner can edit details)
+        (isOwner(existing().ownerId) && incoming().diff(existing()).affectedKeys().hasOnly(['title', 'location', 'heads', 'roi', 'carbonReduction', 'image', 'updatedAt']))
+      ) && (existing().status != 'completed' || incoming().status == 'completed');
+      
+      allow delete: if false;
+      
+      // 3. Investments Subcollection (Relational Sync)
+      match /investments/{investmentId} {
+        allow read: if isOwner(existing().userId);
+        allow create: if isSignedIn() && isValidInvestment(incoming());
+      }
+      
+      // 4. IoT Logs Subcollection (Public Asset Management Transparency)
+      match /iot_logs/{logId} {
+        allow read, list: if true; // Public monitoring of asset health
+        allow write: if false; // Managed by IoT worker/system
+      }
+    }
+
+    // 5. Global Investments (For querying my own investments)
+    match /investments/{investmentId} {
+       allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+       allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
+       allow create: if isSignedIn() && isValidInvestment(incoming());
+    }
+  }
+}
