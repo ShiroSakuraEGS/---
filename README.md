@@ -1,20 +1,83 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# 河好如初 - 北港溪沼氣發電眾包平台
 
-# Run and deploy your AI Studio app
+<p align="center">
+  <img src="public/logo.png" alt="北港溪沼氣發電眾包平台 Logo" width="200" />
+</p>
 
-This contains everything you need to run your app locally.
+## 📜 專案起源與願景
 
-View your app in AI Studio: https://ai.studio/apps/15624ab4-1bc1-4b7e-be85-bc31e65078cd
+本專案是 **大同大學** 及 **國立政治大學** 的學生隊伍，於 2026 年 1 月參與由 **聯合報系 x 東海大學** 共同舉辦的關於思考河川永續發展之設計思考工作坊 —— **「河好如初」** 時所提出的創新方案。本計畫成功進入初賽與決賽，並透過此平台原型（Prototype）展現我們對未來綠色能源發展的想像。
 
-## Run Locally
+### 🕊️ 給未來的實踐者
 
-**Prerequisites:**  Node.js
+團隊成員深知，推動沼氣發電與畜牧業廢水治理是一條極具挑戰且複雜的道路。雖然我們對此議題充滿熱忱，並在現有的能力範圍內構思了這個未來藍圖，但仍有許多關鍵技術與細節尚待克服。由於學業規劃與資源限制，我們可能無法持續在該項目投入心力，對此深感遺憾。
 
+因此，我們決定將此平台的 **Prototype 與介面設計模板公開於網路**。我們希望留下一個基礎框架，讓對於相關議題有興趣的志士、認為此項目具備可行性且願意繼續實踐的人，能夠踏著我們的肩膀向上前進。
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+**「願這個願望能在網路世界長久保存，讓懂得技術或熱愛環境的人，能延續這份火種，總有一天完成它。」**
+
+---
+
+## 💡 核心理念
+
+本平台參考了「陽光伏特家」太陽能電板的眾包形式，以 **北港溪流域** 的畜牧業廢水作為起始思考點。我們透過「眾包小型沼氣發電裝置」的角度，建構出一個連結 **大眾、企業、畜牧業者、以及政府** 的數位循環生態系。
+
+透過商業模式的引導，讓廢水處理不再只是負擔，而是能產生價值的能源資產，從源頭減少河川污染。
+
+---
+
+## 🏦 商業模式 (Business Model)
+
+平台核心在於建立多方互利的生態循環：
+
+- **大眾投資人 (Individuals):**
+  - 以群眾募資方式參與綠能建設。
+  - 享有來自台電躉購電價的穩定金錢回報，實現「綠色小額理財」。
+- **企業參與者 (Corporates):**
+  - 投入資金以換取 **碳權憑證** 與減碳效益證明。
+  - 協助達成企業 ESG 目標，建立環保品牌形象，並享有彈性的收益分配比例。
+- **畜牧業者 (Farmers):**
+  - **零出資** 升級廢水處理設備與沼氣發電系統。
+  - 緩解環保法規壓力，改善農場周邊環境，將廢棄物轉化為電力回饋。
+- **政府與第三方 (Government/EPC):**
+  - 對接「農業部沼氣發電推動計畫辦公室」，確保設備商技術達標。
+  - 建立透明的監測數據，作為政策推廣與補貼的依據。
+
+---
+
+## 🛠️ 技術架構 (Technical Architecture)
+
+本平台 prototype 採用現代網頁開發技術棧，確保介面的流暢度與數據的即時性：
+
+- **Frontend:**
+  - **React 19 & TypeScript:** 構建強型別、易維護的 UI。
+  - **Vite:** 高速的開發與建置工具。
+  - **Tailwind CSS:** 實現現代感、響應式的介面設計。
+  - **Motion (framer-motion):** 精緻的視覺過渡與動畫效果。
+  - **Recharts:** 工業級的數據可視化（用於 IoT 模擬監測數據）。
+- **Backend / Infrastructure:**
+  - **Firebase Authentication:** 安全的會員登入系統（支援 Google 登入）。
+  - **Cloud Firestore:** NoSQL 實時資料庫，儲存專案資訊與投資記錄。
+  - **IoT Simulation Integration:** 模擬前端與實體設備數據對接介面。
+
+---
+
+## 📂 資料夾結構說明
+
+- `/public`: 存放 Logo、地圖 SVG 等靜態資源。
+- `/src/components`: 包含試算器、圖表、UI 基本元件。
+- `/src/pages`: 核心頁面（首頁、投資專案列表、會員中心儀錶板）。
+- `/src/contexts`: 認證狀態管理。
+- `/firebase-blueprint.json`: 資料庫結構設計藍圖。
+
+---
+
+## 📮 聯絡我們
+
+若您對於此項目有任何想法，或希望進一步實踐此提案，歡迎聯繫我們：
+
+**北港溪沼氣發電眾包平台項目技術長 - Clive Chan**
+📧 Email: [ai114364136@gmail.com](mailto:ai114364136@gmail.com)
+
+---
+*願北港溪流再次清澈，「河」好如初。*
