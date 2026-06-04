@@ -11,7 +11,7 @@ export default function Home() {
         <div className="absolute inset-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2832&auto=format&fit=crop')] bg-cover bg-center" />
         <div className="absolute inset-0 bg-gradient-to-t from-emerald-900 via-emerald-900/80 to-transparent" />
         
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 lg:py-48">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 lg:py-48 flex flex-col lg:flex-row items-center justify-between gap-12">
           <div className="max-w-3xl">
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
               投資綠色能源，<br />
@@ -33,6 +33,9 @@ export default function Home() {
                 </Button>
               </a>
             </div>
+          </div>
+          <div className="hidden lg:flex w-80 h-80 items-center justify-center p-8 bg-white/10 backdrop-blur-sm rounded-3xl border border-white/20">
+            <img src="/logo.png" alt="北港溪沼氣發電眾包平台 Logo" className="w-full h-auto object-contain brightness-0 invert" />
           </div>
         </div>
       </section>

@@ -14,42 +14,81 @@ import { handleFirestoreError } from '@/lib/errorHandlers';
 const mockProjects = [
   {
     id: '1',
-    title: '雲林崙背鄉 A 農場沼氣發電計畫',
-    location: '雲林縣崙背鄉',
-    heads: 2000,
-    targetAmount: 456.4, // 萬元
+    title: '林養豬場 綠能升級',
+    location: '雲林縣斗六市',
+    heads: 2500,
+    targetAmount: 500, // 萬元
     currentAmount: 320,
-    roi: '8.9', // 年回收
-    carbonReduction: '1,200', // 噸/年
+    roi: '8.5', // 年回收
+    carbonReduction: '1,500', // 噸/年
     status: 'funding',
     image: 'https://images.unsplash.com/photo-1592424001807-162111812a5b?q=80&w=2940&auto=format&fit=crop',
     ownerId: 'farmer_demo_1'
   },
   {
     id: '2',
-    title: '嘉義六腳鄉 B 牧場永續升級案',
-    location: '嘉義縣六腳鄉',
-    heads: 5000,
-    targetAmount: 1141,
-    currentAmount: 1141,
-    roi: '8.5',
-    carbonReduction: '3,000',
+    title: '大清畜牧場 循環經濟',
+    location: '雲林縣虎尾鎮',
+    heads: 4000,
+    targetAmount: 850,
+    currentAmount: 850,
+    roi: '9.0',
+    carbonReduction: '2,400',
     status: 'completed',
     image: 'https://images.unsplash.com/photo-1516253593875-bd7ba052fbc5?q=80&w=2940&auto=format&fit=crop',
     ownerId: 'farmer_demo_2'
   },
   {
     id: '3',
-    title: '雲林麥寮鄉 C 畜牧場綠能專案',
-    location: '雲林縣麥寮鄉',
+    title: '永捷畜牧場 沼氣共生',
+    location: '雲林縣大埤鄉',
     heads: 1500,
-    targetAmount: 342.3,
-    currentAmount: 85,
-    roi: '9.2',
+    targetAmount: 350,
+    currentAmount: 120,
+    roi: '8.2',
     carbonReduction: '900',
     status: 'funding',
     image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2832&auto=format&fit=crop',
     ownerId: 'farmer_demo_3'
+  },
+  {
+    id: '4',
+    title: '銘仁畜牧場 智慧監控',
+    location: '雲林縣虎尾鎮',
+    heads: 3000,
+    targetAmount: 600,
+    currentAmount: 450,
+    roi: '8.8',
+    carbonReduction: '1,800',
+    status: 'funding',
+    image: 'https://images.unsplash.com/photo-1551214041-944d18faaf9c?q=80&w=3000&auto=format&fit=crop',
+    ownerId: 'farmer_demo_4'
+  },
+  {
+    id: '5',
+    title: '源畜牧場 生態復育',
+    location: '雲林縣林內鄉',
+    heads: 2000,
+    targetAmount: 400,
+    currentAmount: 180,
+    roi: '8.0',
+    carbonReduction: '1,200',
+    status: 'funding',
+    image: 'https://images.unsplash.com/photo-1516480579624-9eaeb72ddbb0?q=80&w=3000&auto=format&fit=crop',
+    ownerId: 'farmer_demo_5'
+  },
+  {
+    id: '6',
+    title: '興牧場 綠色轉型',
+    location: '雲林縣水林鄉',
+    heads: 5000,
+    targetAmount: 1000,
+    currentAmount: 250,
+    roi: '9.5',
+    carbonReduction: '3,000',
+    status: 'funding',
+    image: 'https://images.unsplash.com/photo-1533090161767-e6ffed986c88?q=80&w=3000&auto=format&fit=crop',
+    ownerId: 'farmer_demo_6'
   }
 ];
 
@@ -61,7 +100,7 @@ export default function Projects() {
   const [loading, setLoading] = useState(true);
   
   const [investingIn, setInvestingIn] = useState<string | null>(null);
-  const [investAmount, setInvestAmount] = useState<number | ''>(5000);
+  const [investAmount, setInvestAmount] = useState<number | ''>(3000);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -71,10 +110,15 @@ export default function Projects() {
   const fetchProjects = async () => {
     try {
       const querySnapshot = await getDocs(collection(db, 'projects'));
-      if (querySnapshot.empty) {
+      if (querySnapshot.empty || querySnapshot.size < mockProjects.length) {
         if (auth.currentUser) {
            await seedProjects();
-           await fetchProjects();
+           const newSnapshot = await getDocs(collection(db, 'projects'));
+           const reLoaded = newSnapshot.docs.map(doc => ({
+             id: doc.id,
+             ...doc.data()
+           }));
+           setProjects(reLoaded);
         } else {
            setProjects(mockProjects); // Fallback if not logged in and no data
         }
@@ -97,7 +141,8 @@ export default function Projects() {
       for (const p of mockProjects) {
         const docRef = doc(db, 'projects', p.id);
         const { id, ...data } = p;
-        await setDoc(docRef, data);
+        // Inject currentUser uid so security rules pass
+        await setDoc(docRef, { ...data, ownerId: auth.currentUser?.uid || data.ownerId });
       }
     } catch(err) {
       console.error('Seed error:', err);
@@ -108,8 +153,8 @@ export default function Projects() {
     if (!auth.currentUser) return;
     
     const amountNum = Number(investAmount);
-    if (!amountNum || amountNum < 1000 || amountNum > 10000) {
-      alert('請輸入 NT$1,000 ~ NT$10,000 之間的投資金額');
+    if (!amountNum || amountNum < 3000 || amountNum % 1000 !== 0) {
+      alert('請輸入 NT$3,000 或以上的投資金額，且必須為 1,000 的倍數');
       return;
     }
     
@@ -170,7 +215,7 @@ export default function Projects() {
             return (
               <Card key={project.id} className="overflow-hidden flex flex-col hover:shadow-xl transition-shadow duration-300">
                 <div className="h-48 relative">
-                  <img src={project.image} alt={project.title} className="w-full h-full object-cover" />
+                  <img src={project.image || mockProjects.find(m => m.id === project.id)?.image || 'https://images.unsplash.com/photo-1592424001807-162111812a5b?q=80&w=2940&auto=format&fit=crop'} alt={project.title} className="w-full h-full object-cover" />
                   <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-semibold text-emerald-700">
                     {project.status === 'funding' ? '募資中' : '已達標'}
                   </div>
@@ -223,15 +268,15 @@ export default function Projects() {
                       <div className="w-full space-y-3 bg-slate-50 p-4 border border-slate-200 rounded-xl animate-in zoom-in-95 duration-200">
                         <div className="flex justify-between items-center text-sm font-medium text-slate-700">
                           <span>投資金額 (NT$)</span>
-                          <span className="text-xs text-slate-400">1千 ~ 1萬</span>
+                          <span className="text-xs text-slate-400">最低 3,000 起</span>
                         </div>
                         <Input 
                           type="number" 
-                          min={1000} 
-                          max={10000} 
+                          min={3000} 
+                          step={1000}
                           value={investAmount} 
                           onChange={(e) => setInvestAmount(e.target.value === '' ? '' : Number(e.target.value))}
-                          placeholder="例如: 5000"
+                          placeholder="例如: 3000"
                         />
                         <div className="flex gap-2">
                           <Button 
@@ -256,7 +301,7 @@ export default function Projects() {
                         className="w-full h-12 text-lg" 
                         disabled={project.status === 'completed'}
                         onClick={() => {
-                          setInvestAmount(5000);
+                          setInvestAmount(3000);
                           setInvestingIn(project.id);
                         }}
                       >
