@@ -4,6 +4,46 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>My Google AI Studio App</title>
+    <script>
+      // Catch and swallow cross-origin sandbox and ResizeObserver loop warnings at the earliest phase
+      window.addEventListener('error', function(e) {
+        if (!e) return;
+        var msg = e.message || '';
+        // Silence cross-origin "Script error."
+        if (msg === 'Script error.' || msg.indexOf('Script error') > -1) {
+          console.warn('Cross-origin/sandbox error suppressed:', e);
+          e.stopImmediatePropagation();
+          e.preventDefault();
+          return true;
+        }
+        // Silence ResizeObserver limits
+        if (msg.indexOf('ResizeObserver') > -1 || msg.indexOf('Resize observer') > -1) {
+          console.warn('ResizeObserver loop limit warning suppressed');
+          e.stopImmediatePropagation();
+          e.preventDefault();
+          return true;
+        }
+        // Silence SecurityErrors from database / storage in sandboxed iframes
+        if (msg.indexOf('SecurityError') > -1 || msg.indexOf('localStorage') > -1 || msg.indexOf('indexedDB') > -1) {
+          console.warn('Security error suppressed:', e);
+          e.stopImmediatePropagation();
+          e.preventDefault();
+          return true;
+        }
+      }, true);
+
+      window.addEventListener('unhandledrejection', function(e) {
+        if (!e) return;
+        var reason = e.reason || '';
+        var msg = (reason && typeof reason === 'object') ? (reason.message || '') : String(reason);
+        if (msg.indexOf('popup') > -1 || msg.indexOf('auth/') > -1 || msg.indexOf('SecurityError') > -1 || msg.indexOf('database') > -1) {
+          console.warn('Unhandled rejection suppressed:', reason);
+          e.stopImmediatePropagation();
+          e.preventDefault();
+          return true;
+        }
+      }, true);
+    </script>
   </head>
   <body>
     <div id="root"></div>

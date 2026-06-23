@@ -7,7 +7,7 @@ import IoTChart from '@/components/IoTChart';
 import Calculator from '@/components/Calculator';
 import { User, Building2, Tractor, Wallet, Leaf, Activity, MessageSquare, Zap, LogOut, Loader2 } from 'lucide-react';
 import { useAuth, Role } from '@/contexts/AuthContext';
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { signInWithPopup, GoogleAuthProvider, signInAnonymously } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { handleFirestoreError } from '@/lib/errorHandlers';
@@ -122,6 +122,18 @@ function LoginScreen() {
     }
   };
 
+  const handleDemoLogin = async () => {
+    setSigningIn(true);
+    try {
+      await signInAnonymously(auth);
+      await login(selectedRole);
+    } catch (error) {
+      console.error("Demo login failed:", error);
+    } finally {
+      setSigningIn(false);
+    }
+  };
+
   return (
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl w-full bg-white rounded-3xl shadow-xl overflow-hidden flex flex-col md:flex-row border border-slate-100 animate-in fade-in zoom-in-95 duration-500">
@@ -178,7 +190,7 @@ function LoginScreen() {
               </button>
             </div>
 
-            <div className="pt-4">
+            <div className="space-y-3 pt-4">
               <Button 
                 onClick={handleGoogleLogin} 
                 disabled={signingIn}
@@ -190,6 +202,28 @@ function LoginScreen() {
                   <>
                     <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5" />
                     使用 Google 帳號登入
+                  </>
+                )}
+              </Button>
+
+              <div className="relative flex py-2 items-center text-slate-400">
+                <div className="flex-grow border-t border-slate-200"></div>
+                <span className="flex-shrink mx-4 text-xs font-semibold uppercase tracking-wider text-slate-400">或</span>
+                <div className="flex-grow border-t border-slate-200"></div>
+              </div>
+
+              <Button 
+                onClick={handleDemoLogin} 
+                disabled={signingIn}
+                variant="outline"
+                className="w-full border-emerald-200 bg-emerald-50/30 hover:bg-emerald-50 text-emerald-800 shadow-sm h-12 text-base rounded-xl flex items-center justify-center gap-2 font-semibold"
+              >
+                {signingIn ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <>
+                    <Zap className="w-4 h-4 text-emerald-600 animate-pulse" />
+                    以選定身分免密碼快速體驗
                   </>
                 )}
               </Button>
@@ -284,7 +318,7 @@ function CorporateDashboard({ investments }: { investments: any[] }) {
   const [carbonRatio, setCarbonRatio] = useState(50);
   const totalInvested = investments.reduce((acc, inv) => acc + inv.amount, 0);
   const totalCarbon = investments.reduce((acc, inv) => {
-    const carbonVal = parseFloat(inv.projectCarbon?.replace(/,/g, '') || '0');
+    const carbonVal = parseFloat(String(inv.projectCarbon || '0').replace(/,/g, ''));
     // Simplified: share carbon based on investment proportion (just a mock logic)
     return acc + (carbonVal * 0.01); 
   }, 0);
@@ -369,7 +403,7 @@ function CorporateDashboard({ investments }: { investments: any[] }) {
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-semibold text-blue-600">+ {(parseFloat(inv.projectCarbon?.replace(/,/g, '') || '0') * 0.01).toFixed(1)} 噸</div>
+                      <div className="font-semibold text-blue-600">+ {(parseFloat(String(inv.projectCarbon || '0').replace(/,/g, '')) * 0.01).toFixed(1)} 噸</div>
                       <div className="text-xs text-slate-500">預估碳權</div>
                     </div>
                   </div>

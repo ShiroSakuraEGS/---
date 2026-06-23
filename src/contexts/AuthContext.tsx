@@ -62,8 +62,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const userDocRef = doc(db, 'users', auth.currentUser.uid);
       await setDoc(userDocRef, {
         role: newRole,
-        email: auth.currentUser.email,
-        displayName: auth.currentUser.displayName,
+        email: auth.currentUser.email || 'demo-user@beigang-biogas.tw',
+        displayName: auth.currentUser.displayName || '北港溪綠能體驗官',
         updatedAt: new Date()
       }, { merge: true });
       setRole(newRole);
